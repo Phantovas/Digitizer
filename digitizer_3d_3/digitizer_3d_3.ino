@@ -3,6 +3,8 @@
 #define CHK(x,y) (x & (1<<y))           		// |
 #define TOG(x,y) (x^=(1<<y))            		//-+
 
+#define PULSE_ON_360 2000.0
+
 //**************************************************************************
 //	Hardware connections:
 //**************************************************************************
@@ -22,6 +24,7 @@ volatile int encref[4][4]=
   { 1, 1, 0,-1  },
   { 0,-1, 1, 0  }
 };
+
 void sendFloat(float f,unsigned t) {
   byte * b = (byte *) &f;
   Serial.write(t);
@@ -29,7 +32,14 @@ void sendFloat(float f,unsigned t) {
   Serial.write(b[1]);
   Serial.write(b[2]);
   Serial.write(b[3]);
+
 }
+void sendFloat(float f,char* t) {
+  Serial.print(t);
+  Serial.print(" ");
+  Serial.println(f);
+}
+
 
 volatile long encoder[3]={0,0,0};							//-Encoder value
 volatile unsigned char encoder_state=0;				//-State machine variables
@@ -64,15 +74,15 @@ void setup()
   encoder[2]=(-113.374/360.0)*2400.0;
 */
 
-  encoder[0]=(45.0/360)*2400.0;//45deg
-  encoder[1]=(32.043/360.0)*2400.0;
-  encoder[2]=(-113.174/360.0)*2400.0;
+  encoder[0]=(45.0/360.0)*PULSE_ON_360;//45deg
+  encoder[1]=(32.043/360.0)*PULSE_ON_360;
+  encoder[2]=(-113.174/360.0)*PULSE_ON_360;
   
   TCCR1A=0x00;						//-Timer 1 inerrupt
   TCCR1B=0x01;                        // |
   TCCR1C=0x00;                        // |
   SET(TIMSK1,OCIE1A);                 // |
-  sei();                              //-+
+  sei();                 // enable interrupts
   Serial.begin(19200);
   DDRB=0x00;
   PORTB=0xff;
@@ -87,9 +97,9 @@ void loop()
 {
   if(flag)
   {
-    double A=(double)encoder[1]*M_PI/1200.0;
-    double B=(double)encoder[2]*M_PI/1200.0;
-    double C=(double)encoder[0]*M_PI/1200.0;
+    double A=(double)encoder[1]*M_PI/1000.0;
+    double B=(double)encoder[2]*M_PI/1000.0;
+    double C=(double)encoder[0]*M_PI/1000.0;
 
     double r=cos(A)*ARM+cos(A+B)*ARM;
     double h=sin(A)*ARM+sin(A+B)*ARM+H0;
@@ -100,16 +110,18 @@ void loop()
 
     flag=0;
     while(!flag)
-      asm("nop");    
-    sendFloat(x,'x');
+      asm("nop");    //Each 'nop' statement executes in one machine cycle (at 16 MHz) yielding a 62.5 ns (nanosecond) delay.  
+    sendFloat(x,"x");
     flag=0;
     while(!flag)
       asm("nop");    
-    sendFloat(y,'y');
+    sendFloat(y,"y");
     flag=0;
     while(!flag)
       asm("nop");    
-    sendFloat(z,'z');
+    sendFloat(z,"z");
+  } else {
+    Serial.write("empty");
   }
 }
 
