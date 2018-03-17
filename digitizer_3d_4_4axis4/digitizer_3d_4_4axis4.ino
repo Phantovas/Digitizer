@@ -55,7 +55,7 @@ SIGNAL(TIMER1_COMPA_vect)
 {
   SET(PORTC,0);
   OCR1A+=800;										//16MHz/800=20KHz.
-  //  OCR1A+=1600;										//16MHz/800=20KHz.
+  //  OCR1A+=1600;										//16MHz/1600=10KHz.
   encoder_input=(PINB&0b00111111)|(PIND&0b11000000);						//-Encoder state machine
 
   offset=encref[(encoder_state   &0x03)][(encoder_input   &0x03)];// |
