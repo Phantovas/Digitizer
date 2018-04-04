@@ -17,9 +17,9 @@
 //PORTB.4 (Arduino pin 12) Encoder 2 B channel
 //PORTB.5 (Arduino pin 13) Encoder 2 A channel
 
-#define poBTN_FIX = 2;
+#define poBTN_FIX  2        //пин кнопки фиксации значения
 
-//подключаем антибребезг
+//include Bounce2
 #include <Bounce2.h>
 
 //в таком вид матрица считает четыре фронта, переход с 00 в 01 и 10, и с 11 в 01 и 10 и назад соотвественно
@@ -88,6 +88,9 @@ double C;
 
 void setup() {
   
+  //первичное состояние кнопки
+  pinMode(poBTN_FIX, INPUT);
+  digitalWrite(poBTN_FIX, HIGH);
   //инициализируем пин закрытой очистки
   btnFix.attach(poBTN_FIX);
   btnFix.interval(10);
@@ -131,23 +134,20 @@ void loop() {
     double x = r * sin(C) - 125;
     double z = h;
 
-    //flag=0;
-    //while(!flag)
-    //  asm("nop");    //Each 'nop' statement executes in one machine cycle (at 16 MHz) yielding a 62.5 ns (nanosecond) delay.  
-    sendFloat(x, 'x');
-    //flag=0;
-    //while(!flag)
-    //  asm("nop");    
-    sendFloat(y, 'y');
-    //flag=0;
-    //while(!flag)
-    //  asm("nop");    
-    sendFloat(z, 'z');
-//  } else {
-//    Serial.write("empty");
-//  }
-    Serial.println("$"); //$#13#10 окончание отправки
-        
     
-}
+    //проверяем нажатие кнопки 
+    if (btnFix.update()) {
+      if (btnFix.read() == LOW) 
+        //шлем нажатие клавиши
+        sendFloat(poBTN_FIX, 'b');
+    } else {
+      //шлем координаты
+      sendFloat(x, 'x');
+      sendFloat(y, 'y');
+      sendFloat(z, 'z');
+    }  
 
+    //завершаем передачу данных
+    Serial.println("$"); //$#13#10 окончание отправки
+
+}    
