@@ -49,11 +49,16 @@ void sendFloat(float f, unsigned t) {
   Serial.write(b[1]);
   Serial.write(b[2]);
   Serial.write(b[3]);
-
 }
+
 void sendFloat(float f, char* t) {
   Serial.print(t);
   Serial.print(f);
+}
+
+void sendByte(byte b, unsigned t) {
+  Serial.write(t);
+  Serial.write(b);
 }
 
 
@@ -139,7 +144,7 @@ void loop() {
     if (btnFix.update()) {
       if (btnFix.read() == LOW) 
         //шлем нажатие клавиши
-        sendFloat(poBTN_FIX, 'b');
+        sendByte(poBTN_FIX, 'b');
     } else {
       //шлем координаты
       sendFloat(x, 'x');
