@@ -43,13 +43,20 @@ void setup() {
   encoder_state = PINB;
   
   Serial.begin(19200);
-  Serial.println("start");
+//  Serial.print("\x1B[?25l");                        // Выключение курсора
 }
 
 
 void loop() {
-  //Serial.println(PINB, BIN);
+  
+   //Чистим окно у клиента 
+//  Serial.write(27);
+//  Serial.print("[2J"); // clear screen
+//  Serial.write(27);
+//  Serial.print("[H"); // cursor to home
+  
   Serial.println("===");
+  Serial.println(PINB, BIN);
   Serial.println((encoder_input)&0x03, BIN);
   Serial.println(count);
 }
