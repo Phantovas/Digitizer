@@ -151,13 +151,10 @@ void loop() {
 
     
     //проверяем нажатие кнопки 
-    if (btnFix.update()) {
-      if (btnFix.read() == LOW) { 
-        //шлем нажатие клавиши
-        sendOperCode('b');
-        sendByte(poBTN_FIX);
-        //шлем код окончания 
-      } 
+    if (btnFix.update() && (btnFix.read() == LOW)) {
+      //шлем нажатие клавиши
+      sendOperCode('b');
+      sendByte(poBTN_FIX);
     } else {
       //шлем координаты
       sendOperCode('x');
