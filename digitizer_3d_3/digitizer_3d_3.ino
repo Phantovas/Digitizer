@@ -42,23 +42,33 @@ volatile int encref[4][4] = {
 //кнопка фиксации
 Bounce btnFix;
 
-void sendFloat(float f, unsigned t) {
+/**
+ * Функция отправки дробного числа побайтно в порт
+ * @param float 
+ */ 
+ void sendFloat(float f) {
   byte *b = (byte *) &f;
-  Serial.write(t);
   Serial.write(b[0]);
   Serial.write(b[1]);
   Serial.write(b[2]);
   Serial.write(b[3]);
 }
-
-void sendFloat(float f, char* t) {
-  Serial.print(t);
-  Serial.print(f);
+ 
+/**
+ * Функция обертка отправки байта в порт
+ * @param byte
+ */
+void sendByte(byte b) {
+  Serial.write(b);
 }
 
-void sendByte(byte b, unsigned t) {
+/**
+ * Функция отправки кода операции 
+ * @param char or unigned byte 
+ */
+void sendOperCode(unsigned t) {
   Serial.write(t);
-  Serial.write(b);
+  Serial.write(0xFF);
 }
 
 
@@ -142,14 +152,20 @@ void loop() {
     
     //проверяем нажатие кнопки 
     if (btnFix.update()) {
-      if (btnFix.read() == LOW) 
+      if (btnFix.read() == LOW) { 
         //шлем нажатие клавиши
-        sendByte(poBTN_FIX, 'b');
+        sendOperCode('b');
+        sendByte(poBTN_FIX);
+        //шлем код окончания 
+      } 
     } else {
       //шлем координаты
-      sendFloat(x, 'x');
-      sendFloat(y, 'y');
-      sendFloat(z, 'z');
+      sendOperCode('x');
+      sendFloat(x);
+      sendOperCode('y');
+      sendFloat(y);
+      sendOperCode('z');
+      sendFloat(z);
     }  
 
     //завершаем передачу данных
